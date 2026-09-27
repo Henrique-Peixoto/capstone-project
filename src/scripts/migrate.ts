@@ -13,6 +13,23 @@ const CREATE_MIGRATIONS_TABLE_SQL = `
   );
 `;
 
+async function migrate(): Promise<void> {
+  await pool.query(CREATE_MIGRATIONS_TABLE_SQL);
+  const executed = new Set(await getExecutedMigrations());
+  const pending = getMigrationFiles().filter((file) => !executed.has(file));
+
+  if (pending.length === 0) {
+    logger.info('No pending migrations!');
+    return;
+  }
+
+  for (const fileName of pending) {
+    await runMigration(fileName);
+  }
+
+  logger.info('All migrations completed');
+}
+
 type MigrationRow = {
   name: string
 }
@@ -46,23 +63,6 @@ async function runMigration(fileName: string): Promise<void> {
   } finally {
     client.release();
   }
-}
-
-async function migrate(): Promise<void> {
-  await pool.query(CREATE_MIGRATIONS_TABLE_SQL);
-  const executed = new Set(await getExecutedMigrations());
-  const pending = getMigrationFiles().filter((file) => !executed.has(file));
-
-  if (pending.length === 0) {
-    logger.info('No pending migrations!');
-    return;
-  }
-
-  for (const fileName of pending) {
-    await runMigration(fileName);
-  }
-
-  logger.info('All migrations completed');
 }
 
 migrate()
