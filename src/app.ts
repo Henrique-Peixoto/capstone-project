@@ -13,7 +13,7 @@ export function createApp() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use('/api', apiRouter);
-  app.use(errorHandler);
   app.use(notFound);
+  app.use(errorHandler);
   return app;
 };
