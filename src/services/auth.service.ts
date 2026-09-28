@@ -1,7 +1,13 @@
 import bcrypt from "bcryptjs";
 import { MIN_PASSWORD_LENGTH, PASSWORD_HASHING_KEY } from "../constants";
 import { AppError } from "../errors/AppError";
-import { findUserByEmail, createUser } from "../repositories/user.repository"
+import { 
+  findUserByEmail, 
+  createUser, 
+  findUserByEmailWithPassword 
+} from "../repositories/user.repository"
+import { signAccessToken } from "../lib/jwt";
+import { TokenPayload } from "../types/user";
 
 export async function registerUser(email: string, password: string): Promise<void> {
   if (!hasRequiredFields(email, password)) {
@@ -21,6 +27,34 @@ export async function registerUser(email: string, password: string): Promise<voi
 
   const hashedPassword = await bcrypt.hash(password, PASSWORD_HASHING_KEY);
   await createUser(normalizedEmail, hashedPassword);
+}
+
+export async function loginUser(email: string, password: string): Promise<{accessToken: string}> {
+  if (!hasRequiredFields(email, password)) {
+    throw new AppError(400, 'Email and password are required!');    
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const user = await findUserByEmailWithPassword(normalizedEmail);
+
+  if (!user?.password_hash) {
+    throw new AppError(401, 'Invalid email or password');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+  if (!isPasswordValid) {
+    throw new AppError(401, 'Invalid email or password');
+  }
+
+  const payload: TokenPayload = {
+    user_id: user.id,
+    email: user.email,
+    role: user.role
+  }
+
+  const accessToken = signAccessToken(payload);
+  return { accessToken };
 }
 
 function hasRequiredFields(email: string, password: string): boolean {
