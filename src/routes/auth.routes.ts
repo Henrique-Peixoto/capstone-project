@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../middlewares/auth.middleware';
 import { 
   registerUser,
   loginUser 
@@ -32,4 +33,13 @@ authRouter.get('/login', async(req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+authRouter.get('/me', authenticate, (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      user: req.user
+    }
+  });
 });
