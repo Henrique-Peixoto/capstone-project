@@ -3,6 +3,7 @@ import { Task } from '../types/task';
 import { TASK_TITLE_MAX_LENGTH } from '../constants';
 import { 
   createTask, 
+  fetchTaskById, 
   fetchTaskByUserId 
 } from '../repositories/user.task.repository';
 
@@ -12,7 +13,17 @@ export async function createUserTask(userId: string, title: unknown): Promise<Ta
 }
 
 export async function getUserTasks(userId: string): Promise<Task[]> {
-  return fetchTaskByUserId(userId);
+  return await fetchTaskByUserId(userId);
+}
+
+export async function getUserTaskById(taskId: string, userId: string): Promise<Task> {
+  const task = await fetchTaskById(taskId, userId);
+
+  if (!task) {
+    throw new AppError(404, 'Task not found!');
+  }
+
+  return task;
 }
 
 function validateTitle(title: unknown): string {
