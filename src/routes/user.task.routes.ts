@@ -1,10 +1,6 @@
 import { Router } from 'express';
 import { authenticate } from '../middlewares/auth.middleware'
-import { 
-  createUserTask, 
-  getUserTaskById, 
-  getUserTasks 
-} from '../services/user.task.service';
+import * as userTaskService from '../services/user.task.service';
 
 export const userTaskRouter = Router();
 
@@ -12,7 +8,7 @@ userTaskRouter.use(authenticate);
 
 userTaskRouter.post('/', async (req, res, next) => {
   try {
-    const task = await createUserTask(req.user!.user_id, req.body.title);
+    const task = await userTaskService.createUserTask(req.user!.user_id, req.body.title);
 
     res.status(201).json({
       success: true,
@@ -27,7 +23,7 @@ userTaskRouter.post('/', async (req, res, next) => {
 
 userTaskRouter.get('/', async (req, res, next) => {
   try {
-    const tasks = await getUserTasks(req.user!.user_id);
+    const tasks = await userTaskService.getUserTasks(req.user!.user_id);
     
     res.status(200).json({
       success: true,
@@ -38,9 +34,26 @@ userTaskRouter.get('/', async (req, res, next) => {
   }
 });
 
-userTaskRouter.get('/:taskId', async (req, res, next) => {
+userTaskRouter.get('/:task_id', async (req, res, next) => {
   try {
-    const task = await getUserTaskById(req.params.taskId, req.user!.user_id);
+    const task = await userTaskService.getUserTask(req.params.task_id, req.user!.user_id);
+
+    res.status(200).json({
+      success: true,
+      data: { task }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+userTaskRouter.patch('/:task_id', async(req, res, next) => {
+  try {
+    const task = await userTaskService.updateUserTask(
+      req.params.task_id, 
+      req.user!.user_id, 
+      req.body.title
+    );
 
     res.status(200).json({
       success: true,

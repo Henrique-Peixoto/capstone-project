@@ -3,7 +3,7 @@ import { Task } from '../types/task';
 
 type TaskRow = Task;
 
-export async function createTask(userId: string, title: string): Promise<Task> {
+export async function createUserTask(userId: string, title: string): Promise<Task> {
   const sql = `
     INSERT INTO support_tasks (title, user_id)
     VALUES ($1, $2)
@@ -14,7 +14,7 @@ export async function createTask(userId: string, title: string): Promise<Task> {
   return result.rows[0];
 }
 
-export async function fetchTaskByUserId(userId: string): Promise<Task[]> {
+export async function getUserTasks(userId: string): Promise<Task[]> {
   const sql = `
     SELECT id, title, status, user_id, created_at, updated_at
     FROM support_tasks
@@ -26,7 +26,7 @@ export async function fetchTaskByUserId(userId: string): Promise<Task[]> {
   return result.rows;
 }
 
-export async function fetchTaskById(taskId: string, userId: string): Promise<TaskRow | null> {
+export async function getUserTask(taskId: string, userId: string): Promise<TaskRow | null> {
   const sql = `
     SELECT id, title, status, user_id, created_at, updated_at
     FROM support_tasks
@@ -35,5 +35,17 @@ export async function fetchTaskById(taskId: string, userId: string): Promise<Tas
   `;
 
   const result = await pool.query(sql, [taskId, userId]);
+  return result.rows[0] ?? null;
+}
+
+export async function updateUserTask(taskId: string, userId: string, title: string): Promise<TaskRow | null> {
+  const sql = `
+    UPDATE support_tasks
+    SET title = $1, updated_at = NOW()
+    WHERE id = $2 AND user_id = $3
+    RETURNING id, title, status, user_id, created_at, updated_at;
+  `;
+
+  const result = await pool.query(sql, [title, taskId, userId]);
   return result.rows[0] ?? null;
 }

@@ -1,23 +1,30 @@
 import { AppError } from '../errors/AppError';
 import { Task } from '../types/task';
 import { TASK_TITLE_MAX_LENGTH } from '../constants';
-import { 
-  createTask, 
-  fetchTaskById, 
-  fetchTaskByUserId 
-} from '../repositories/user.task.repository';
+import * as userTaskRepository from '../repositories/user.task.repository';
 
 export async function createUserTask(userId: string, title: unknown): Promise<Task> {
   const validTitle = validateTitle(title);
-  return await createTask(userId, validTitle);
+  return await userTaskRepository.createUserTask(userId, validTitle);
 }
 
 export async function getUserTasks(userId: string): Promise<Task[]> {
-  return await fetchTaskByUserId(userId);
+  return await userTaskRepository.getUserTasks(userId);
 }
 
-export async function getUserTaskById(taskId: string, userId: string): Promise<Task> {
-  const task = await fetchTaskById(taskId, userId);
+export async function getUserTask(taskId: string, userId: string): Promise<Task> {
+  const task = await userTaskRepository.getUserTask(taskId, userId);
+
+  if (!task) {
+    throw new AppError(404, 'Task not found!');
+  }
+
+  return task;
+}
+
+export async function updateUserTask(taskId: string, userId: string, title: string): Promise<Task> {
+  const validTitle = validateTitle(title);
+  const task = await userTaskRepository.updateUserTask(taskId, userId, validTitle);
 
   if (!task) {
     throw new AppError(404, 'Task not found!');
