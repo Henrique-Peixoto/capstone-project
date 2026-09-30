@@ -33,6 +33,14 @@ export async function updateUserTask(taskId: string, userId: string, title: stri
   return task;
 }
 
+export async function deleteUserTask(taskId: string, userId: string): Promise<void> {
+  const deleted = await userTaskRepository.deleteUserTask(taskId, userId);
+
+  if (!deleted) {
+    throw new AppError(404, 'Task not found!');
+  }
+}
+
 function validateTitle(title: unknown): string {
   if (typeof title !== 'string' || title.trim().length === 0) {
     throw new AppError(400, 'Title is required!');

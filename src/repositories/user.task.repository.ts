@@ -49,3 +49,14 @@ export async function updateUserTask(taskId: string, userId: string, title: stri
   const result = await pool.query(sql, [title, taskId, userId]);
   return result.rows[0] ?? null;
 }
+
+export async function deleteUserTask(taskId: string, userId: string): Promise<boolean> {
+  const sql = `
+    DELETE FROM support_tasks
+    WHERE id = $1 AND user_id = $2
+    RETURNING id, title, status, user_id, created_at, updated_at;
+  `;
+
+  const result = await pool.query(sql, [taskId, userId]);
+  return (result.rowCount ?? 0) > 0;
+}

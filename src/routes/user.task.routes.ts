@@ -63,3 +63,16 @@ userTaskRouter.patch('/:task_id', async(req, res, next) => {
     next(error);
   }
 });
+
+userTaskRouter.delete('/:task_id', async(req, res, next) => {
+  try {
+    await userTaskService.deleteUserTask(req.params.task_id, req.user!.user_id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Task successfully deleted!'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
