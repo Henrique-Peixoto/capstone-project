@@ -21,7 +21,8 @@
     "start": "node dist/server.js",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "migrate": "tsx src/scripts/migrate.ts"
+    "migrate": "tsx src/scripts/migrate.ts",
+    "psql": "docker exec -it nodejs-capstone-project psql -U postgres -d nodejs-capstone"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

@@ -7,3 +7,8 @@ export type Task = {
   updated_at: Date;
 }
 
+export type AdminTaskQueryParams = {
+  search?: string;
+  status?: string;
+}
+
